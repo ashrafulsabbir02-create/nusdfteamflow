@@ -98,7 +98,7 @@ async function render(){
   app.textContent='';
   if(!session){ renderAuth(); return; }
   profile = await loadProfile();
-  const isAdmin = session.user.email===ADMIN;
+  const isAdmin = session.user.email===ADMIN || (profile && profile.is_admin);
   if(!isAdmin && !(profile && profile.approved)){ renderWaiting(); return; }
   renderBoard(isAdmin);
 }
@@ -159,6 +159,17 @@ async function renderBoard(isAdmin){
   app.append(top);
 
   if(isAdmin){
+    const others = (profiles||[]).filter(p=>p.email!==ADMIN);
+    if(others.length){
+      const abox = el('div',{class:'card',style:'margin-bottom:16px'}, el('h2',{style:'margin:0 0 8px;font-size:16px'},'সদস্যরা'));
+      others.forEach(p=>{
+        abox.append(el('div',{class:'pending'},
+          el('span',{}, p.full_name || p.email, p.is_admin?el('b',{style:'margin-left:6px;color:var(--c)'},'(অ্যাডমিন)'):''),
+          el('button',{class:p.is_admin?'danger':'ghost',onclick:async()=>{ await sb.from('profiles').update({is_admin:!p.is_admin}).eq('id',p.id); render(); }}, p.is_admin?'অ্যাডমিন সরাও':'অ্যাডমিন বানাও')
+        ));
+      });
+      app.append(abox);
+    }
     const pend = (profiles||[]).filter(p=>!p.approved && p.email!==ADMIN);
     if(pend.length){
       const box = el('div',{class:'card',style:'margin-bottom:16px'}, el('h2',{style:'margin:0 0 8px;font-size:16px'},'অনুমোদনের অপেক্ষায় ('+pend.length+')'));
