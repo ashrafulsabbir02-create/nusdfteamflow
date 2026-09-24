@@ -7,50 +7,57 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--paper:#F5F6F8;--panel:#FFF;--ink:#171B24;--muted:#5B6372;--line:#DCE0E7;--soft:#ECEEF2;--c:#0098CC;--m:#D6007A;--y:#E5B800;--k:#2B2F38;--danger:#C0173F;
+:root{--paper:#F6F7FB;--panel:#FFF;--ink:#171B24;--muted:#69707E;--line:#E4E7EE;--soft:#F1F3F8;
+--graphic:#0098CC;--video:#D6007A;--brand:#E5A100;--pres:#7B4FE0;--photo:#1E9E63;--danger:#C0173F;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-t]){--paper:#0E1117;--panel:#171B24;--ink:#EEF1F6;--muted:#9BA4B4;--line:#2B313D;--soft:#1F2430}}
 *{box-sizing:inherit}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:'Hind Siliguri',system-ui,sans-serif;font-size:16px}
-h1,h2{font-family:'Bricolage Grotesque','Hind Siliguri',sans-serif}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:9px 16px;font-weight:600;min-height:40px}
-button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-button.danger{background:transparent;color:var(--danger);border-color:var(--line)}
-input,select,textarea{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:9px 10px;width:100%}
-.wrap{max-width:1100px;margin:0 auto;padding:16px}
-.center{max-width:380px;margin:60px auto;text-align:center}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;text-align:left}
-.fld{margin-bottom:12px}.fld span{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:600}
+h1,h2{font-family:'Bricolage Grotesque','Hind Siliguri',sans-serif;letter-spacing:-.01em}
+button,input,select{font:inherit}
+button{cursor:pointer;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:9px 16px;font-weight:600;min-height:40px;transition:transform .08s}
+button:active{transform:scale(.97)}
+button.ghost{background:#fff;color:var(--ink);border-color:var(--line)}
+button.danger{background:#fff;color:var(--danger);border-color:var(--line)}
+input,select{border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 10px;width:100%}
+.wrap{max-width:1160px;margin:0 auto;padding:18px 16px 40px}
+.center{max-width:400px;margin:64px auto;text-align:center}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:left;box-shadow:0 2px 10px rgba(20,24,40,.05)}
+.logo{display:inline-flex;gap:5px;margin-bottom:10px}
+.logo span{width:14px;height:14px;border-radius:50%}
+.fld{margin-bottom:13px}.fld span{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:600}
 .err{color:var(--danger);font-size:14px;min-height:20px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.top h1{margin:0;font-size:24px}
-.badge{background:var(--soft);border-radius:999px;padding:3px 12px;font-size:13px;color:var(--muted)}
-.board{display:grid;gap:12px;grid-template-columns:1fr}
-@media(min-width:900px){.board{grid-template-columns:repeat(4,1fr)}}
-.col h2{font-size:16px;margin:0 0 8px}
-.list{background:var(--soft);border-radius:12px;padding:8px;min-height:80px;display:flex;flex-direction:column;gap:8px}
-.t{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--cat,var(--k));border-radius:10px;padding:9px 11px}
-.t h3{margin:2px 0 6px;font-size:15px}
-.t .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;flex-wrap:wrap;gap:6px}
-.t .mv{display:flex;justify-content:flex-end;gap:6px;margin-top:6px}
-.t .mv button{min-height:30px;padding:2px 10px;font-size:14px}
-.pending{border:1px solid var(--line);border-radius:10px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
-dialog{border:1px solid var(--line);border-radius:14px;padding:18px;width:min(480px,calc(100% - 24px));background:var(--panel);color:var(--ink)}
-dialog::backdrop{background:rgba(8,10,16,.5)}
-.foot{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.top h1{margin:0;font-size:26px;display:flex;align-items:center;gap:8px}
+.badge{background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 14px;font-size:13px;color:var(--muted)}
+.board{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:960px){.board{grid-template-columns:repeat(5,1fr)}}
+.col h2{font-size:15px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.col h2 b{color:var(--ink);font-size:13px;background:var(--soft);border-radius:999px;padding:1px 9px;font-weight:700}
+.list{background:var(--soft);border-radius:14px;padding:9px;min-height:90px;display:flex;flex-direction:column;gap:9px}
+.t{background:#fff;border:1px solid var(--line);border-left:5px solid var(--cat,#888);border-radius:12px;padding:11px 13px;box-shadow:0 1px 4px rgba(20,24,40,.05);cursor:pointer;transition:box-shadow .1s,transform .1s}
+.t:hover{box-shadow:0 4px 14px rgba(20,24,40,.10);transform:translateY(-1px)}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:color-mix(in srgb, var(--cat) 15%, white);color:var(--cat)}
+.t h3{margin:7px 0 8px;font-size:15px;line-height:1.35}
+.t .meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;flex-wrap:wrap;gap:6px}
+.urgent{color:var(--danger);font-weight:700;font-size:12px}
+.avatar{width:22px;height:22px;border-radius:50%;background:var(--cat,#888);color:#fff;font-size:11px;font-weight:700;display:inline-grid;place-items:center}
+.mv{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
+.mv button{min-height:28px;padding:2px 11px;font-size:15px;border-radius:8px}
+.pending{border:1px solid var(--line);border-radius:12px;padding:9px 13px;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;background:#fff}
+dialog{border:none;border-radius:16px;padding:22px;width:min(480px,calc(100% - 24px));background:#fff;color:var(--ink);box-shadow:0 12px 40px rgba(20,24,40,.18)}
+dialog::backdrop{background:rgba(15,18,30,.5)}
+.foot{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
 .hide{display:none!important}
 .muted{color:var(--muted);font-size:14px}
+.empty{text-align:center;padding:16px;color:var(--muted);font-size:14px}
 </style>
 </head>
 <body>
 <div id="app" class="wrap"></div>
 <dialog id="taskDlg">
-  <h2 id="dTitle" style="margin:0 0 10px"></h2>
+  <h2 id="dTitle" style="margin:0 0 12px"></h2>
   <div class="fld"><span>কাজের নাম</span><input id="fTitle" maxlength="120"></div>
-  <div class="fld"><span>ধরন</span><select id="fCat">
-    <option value="graphic">গ্রাফিক</option><option value="video">ভিডিও</option><option value="social">সোশ্যাল</option><option value="web">ওয়েব</option>
-  </select></div>
+  <div class="fld"><span>সেক্টর</span><select id="fCat"></select></div>
   <div class="fld"><span>দায়িত্বে</span><select id="fWho"></select></div>
   <div class="fld"><span>ধাপ</span><select id="fStage">
     <option value="todo">করার কাজ</option><option value="doing">চলছে</option><option value="review">রিভিউ</option><option value="done">শেষ</option>
@@ -68,8 +75,7 @@ dialog::backdrop{background:rgba(8,10,16,.5)}
 const SB_URL='https://fkmkmxiprdxomapqvtph.supabase.co';
 const SB_KEY='sb_publishable_cYFyeRjqpCPlmO5uqlwUKQ_CSuyHx0U';
 const ADMIN='ashrafulsabbir02@gmail.com';
-const CAT={graphic:'গ্রাফিক',video:'ভিডিও',social:'সোশ্যাল',web:'ওয়েব'};
-const CATV={graphic:'--c',video:'--m',social:'--y',web:'--k'};
+const CAT={graphic:'গ্রাফিক ডিজাইন',video:'ভিডিও এডিটিং',brand:'ব্র্যান্ড কমিউনিকেশন',pres:'ব্র্যান্ড প্রেজেন্টেশন',photo:'ফটোগ্রাফি'};
 const STAGE={todo:'করার কাজ',doing:'চলছে',review:'রিভিউ',done:'শেষ'};
 const sb = window.supabase.createClient(SB_URL, SB_KEY);
 const app = document.getElementById('app');
@@ -109,6 +115,7 @@ function renderAuth(){
   const pass = el('input',{type:'password',placeholder:'পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)'});
   const name = el('input',{type:'text',placeholder:'নাম'});
   const box = el('div',{class:'card'},
+    el('div',{class:'logo'}, el('span',{style:'background:var(--graphic)'}), el('span',{style:'background:var(--video)'}), el('span',{style:'background:var(--brand)'}), el('span',{style:'background:var(--pres)'}), el('span',{style:'background:var(--photo)'})),
     el('h1',{},'TeamFlow'),
     el('p',{class:'muted'},'সাইন আপ করো অথবা লগইন করো।'),
     el('div',{class:'fld'}, el('span',{},'নাম'), name),
@@ -147,10 +154,11 @@ async function renderBoard(isAdmin){
   const {data:profiles} = await sb.from('profiles').select('*').order('created_at');
   const {data:tasks} = await sb.from('tasks').select('*').order('created_at');
   const nameOf = id => (profiles||[]).find(p=>p.id===id)?.full_name || (profiles||[]).find(p=>p.id===id)?.email || '';
+  const initial = n => n ? Array.from(n)[0].toUpperCase() : '?';
 
   const top = el('div',{class:'top'},
-    el('h1',{},'TeamFlow'),
-    el('div',{style:'display:flex;gap:8px;align-items:center'},
+    el('h1',{}, el('span',{style:'width:12px;height:12px;border-radius:4px;background:linear-gradient(135deg,var(--graphic),var(--video),var(--pres))'}), 'TeamFlow'),
+    el('div',{style:'display:flex;gap:8px;align-items:center;flex-wrap:wrap'},
       el('span',{class:'badge'}, session.user.email + (isAdmin?' · অ্যাডমিন':'')),
       el('button',{class:'ghost',onclick:()=>openTask(null)},'+ নতুন কাজ'),
       el('button',{class:'ghost',onclick:()=>sb.auth.signOut()},'লগআউট')
@@ -161,10 +169,10 @@ async function renderBoard(isAdmin){
   if(isAdmin){
     const others = (profiles||[]).filter(p=>p.email!==ADMIN);
     if(others.length){
-      const abox = el('div',{class:'card',style:'margin-bottom:16px'}, el('h2',{style:'margin:0 0 8px;font-size:16px'},'সদস্যরা'));
+      const abox = el('div',{class:'card',style:'margin-bottom:14px'}, el('h2',{style:'margin:0 0 8px;font-size:15px'},'সদস্যরা'));
       others.forEach(p=>{
         abox.append(el('div',{class:'pending'},
-          el('span',{}, p.full_name || p.email, p.is_admin?el('b',{style:'margin-left:6px;color:var(--c)'},'(অ্যাডমিন)'):''),
+          el('span',{}, p.full_name || p.email, p.is_admin?el('b',{style:'margin-left:6px;color:var(--graphic)'},'(অ্যাডমিন)'):''),
           el('button',{class:p.is_admin?'danger':'ghost',onclick:async()=>{ await sb.from('profiles').update({is_admin:!p.is_admin}).eq('id',p.id); render(); }}, p.is_admin?'অ্যাডমিন সরাও':'অ্যাডমিন বানাও')
         ));
       });
@@ -172,7 +180,7 @@ async function renderBoard(isAdmin){
     }
     const pend = (profiles||[]).filter(p=>!p.approved && p.email!==ADMIN);
     if(pend.length){
-      const box = el('div',{class:'card',style:'margin-bottom:16px'}, el('h2',{style:'margin:0 0 8px;font-size:16px'},'অনুমোদনের অপেক্ষায় ('+pend.length+')'));
+      const box = el('div',{class:'card',style:'margin-bottom:16px'}, el('h2',{style:'margin:0 0 8px;font-size:15px'},'অনুমোদনের অপেক্ষায় ('+pend.length+')'));
       pend.forEach(p=>{
         box.append(el('div',{class:'pending'},
           el('span',{}, p.full_name || p.email, el('br'), el('span',{class:'muted'},p.email)),
@@ -190,13 +198,16 @@ async function renderBoard(isAdmin){
   Object.keys(STAGE).forEach(st=>{
     const items = (tasks||[]).filter(x=>x.stage===st);
     const list = el('div',{class:'list'});
-    if(!items.length) list.append(el('p',{class:'muted',style:'text-align:center;padding:14px'},'কোনো কাজ নেই'));
+    if(!items.length) list.append(el('p',{class:'empty'},'কোনো কাজ নেই'));
     items.forEach(tk=>{
       const idx = Object.keys(STAGE).indexOf(st);
-      const card = el('div',{class:'t',style:'--cat:var('+CATV[tk.cat]+')',onclick:()=>openTask(tk)},
-        el('div',{class:'meta'}, CAT[tk.cat], tk.pri==='urgent'?el('b',{style:'color:var(--danger)'},'জরুরি'):''),
+      const card = el('div',{class:'t',style:'--cat:var(--'+tk.cat+')',onclick:()=>openTask(tk)},
+        el('div',{class:'meta'}, el('span',{class:'pill'},CAT[tk.cat]), tk.pri==='urgent'?el('span',{class:'urgent'},'জরুরি'):''),
         el('h3',{},tk.title),
-        el('div',{class:'meta'}, nameOf(tk.who)||'—', tk.due||''),
+        el('div',{class:'meta'},
+          el('span',{style:'display:flex;align-items:center;gap:6px'}, tk.who?el('span',{class:'avatar'},initial(nameOf(tk.who))):'', nameOf(tk.who)||'দায়িত্ব নেই'),
+          tk.due||''
+        ),
         el('div',{class:'mv'},
           el('button',{class:'ghost',disabled:idx===0,onclick:async(e)=>{e.stopPropagation();await moveStage(tk,-1);}},'‹'),
           el('button',{class:'ghost',disabled:idx===3,onclick:async(e)=>{e.stopPropagation();await moveStage(tk,1);}},'›')
@@ -204,7 +215,7 @@ async function renderBoard(isAdmin){
       );
       list.append(card);
     });
-    board.append(el('div',{class:'col'}, el('h2',{},STAGE[st]+' ('+items.length+')'), list));
+    board.append(el('div',{class:'col'}, el('h2',{}, STAGE[st], el('b',{},items.length)), list));
   });
   app.append(board);
 
@@ -222,7 +233,9 @@ function openTask(tk){
   editingId = tk ? tk.id : null;
   document.getElementById('dTitle').textContent = tk ? 'কাজ সম্পাদনা' : 'নতুন কাজ';
   document.getElementById('fTitle').value = tk ? tk.title : '';
-  document.getElementById('fCat').value = tk ? tk.cat : 'graphic';
+  const catSel = document.getElementById('fCat'); catSel.textContent='';
+  Object.keys(CAT).forEach(c=>catSel.append(el('option',{value:c},CAT[c])));
+  catSel.value = tk ? tk.cat : 'graphic';
   document.getElementById('fStage').value = tk ? tk.stage : 'todo';
   document.getElementById('fPri').value = tk ? tk.pri : 'normal';
   document.getElementById('fDue').value = tk ? (tk.due||'') : '';
