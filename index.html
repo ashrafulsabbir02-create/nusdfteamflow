@@ -3,630 +3,242 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TeamFlow – ভিজ্যুয়াল টিম বোর্ড</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>TeamFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
-  --paper:#F5F6F8; --panel:#FFFFFF; --ink:#171B24; --muted:#5B6372; --line:#DCE0E7; --soft:#ECEEF2;
-  --c:#0098CC; --m:#D6007A; --y:#E5B800; --k:#2B2F38; --danger:#C0173F;
-  --display:'Bricolage Grotesque','Hind Siliguri',system-ui,sans-serif;
-  --body:'Hind Siliguri','Bricolage Grotesque',system-ui,sans-serif;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --paper:#0E1117; --panel:#171B24; --ink:#EEF1F6; --muted:#9BA4B4; --line:#2B313D; --soft:#1F2430;
-    --c:#33BDF0; --m:#FF4DA6; --y:#FFD23F; --k:#C9CED8; --danger:#FF7090;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#0E1117; --panel:#171B24; --ink:#EEF1F6; --muted:#9BA4B4; --line:#2B313D; --soft:#1F2430;
-  --c:#33BDF0; --m:#FF4DA6; --y:#FFD23F; --k:#C9CED8; --danger:#FF7090;
-}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*,*::before,*::after{box-sizing:inherit}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
-button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer}
-:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-
-.wrap{max-width:1240px;margin:0 auto;padding:16px 14px 40px}
-
-/* header */
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
-.brand svg{flex:none}
-.brand h1{margin:0;font-family:var(--display);font-weight:800;font-size:26px;line-height:1.1;letter-spacing:-.01em}
-.brand p{margin:0;color:var(--muted);font-size:13px;line-height:1.3}
-.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-
-.btn{border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:10px;padding:8px 14px;font-weight:600;font-size:15px;min-height:40px}
-.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-.btn.ghost:hover{border-color:var(--ink)}
-.btn.danger{background:transparent;color:var(--danger);border-color:var(--line)}
-.btn.danger[data-armed]{background:var(--danger);color:#fff;border-color:var(--danger)}
-.btn.small{min-height:34px;padding:4px 10px;font-size:14px}
-.icon{border:1px solid var(--line);background:transparent;border-radius:8px;width:34px;height:34px;line-height:1;font-size:18px;display:inline-grid;place-items:center;padding:0}
-.icon:hover{border-color:var(--ink)}
-
-/* stats */
-.stats{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 14px;color:var(--muted);font-size:14px}
-.stats b{font-family:var(--display);font-size:20px;color:var(--ink);margin-right:6px;font-weight:800}
-.stats .late b{color:var(--danger)}
-
-/* toolbar */
-.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
-.tools input[type=search],.tools select{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;min-height:40px;font-size:16px}
-.tools input[type=search]{flex:1 1 180px;min-width:0}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 12px;font-size:14px;display:inline-flex;align-items:center;gap:6px;min-height:34px}
-.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--cat,var(--muted));display:inline-block;flex:none}
-
-/* board */
-.board{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;margin:0 -14px;padding-left:14px;padding-right:14px}
-.col{flex:0 0 84%;scroll-snap-align:start;min-width:0}
-@media (min-width:900px){
-  .board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible;margin:0;padding:0}
-  .col{flex:initial}
-}
-.col-head{display:flex;align-items:center;gap:8px;padding:0 2px 8px}
-.col-head h2{margin:0;font-family:var(--display);font-size:17px;font-weight:600;flex:1}
-.count{font-size:13px;color:var(--muted);min-width:22px;text-align:center;border:1px solid var(--line);border-radius:999px;padding:0 7px}
-.prog{display:flex;gap:3px;margin-bottom:10px}
-.prog span{flex:1;height:4px;border-radius:2px;background:var(--line)}
-.prog span.on{background:var(--ink)}
-.list{display:flex;flex-direction:column;gap:10px;min-height:120px;padding:6px;border-radius:12px;background:var(--soft)}
-.list.over{outline:2px dashed var(--ink);outline-offset:-2px}
-.empty{color:var(--muted);font-size:14px;text-align:center;padding:26px 8px}
-
-.card{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--cat,var(--k));border-radius:10px;padding:10px 12px 8px;cursor:pointer}
-.card:hover{border-color:var(--ink);border-left-color:var(--cat,var(--k))}
-.card.dragging{opacity:.45}
-.card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
-.tag-urgent{color:var(--danger);font-weight:600}
-.card h3{margin:2px 0 6px;font-size:16px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
-.card-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
-.who{display:inline-flex;align-items:center;gap:6px;min-width:0}
-.avatar{width:22px;height:22px;border-radius:50%;background:var(--soft);border:1px solid var(--line);color:var(--ink);font-size:12px;font-weight:600;display:inline-grid;place-items:center;flex:none}
-.due.late{color:var(--danger);font-weight:600}
-.card-move{display:flex;justify-content:flex-end;gap:6px;margin-top:6px}
-.card-move .icon{width:32px;height:30px;font-size:16px}
-.card-move .icon[disabled]{opacity:.3;cursor:default}
-
-/* dialogs */
-dialog{border:1px solid var(--line);border-radius:14px;padding:0;background:var(--panel);color:var(--ink);width:min(540px,calc(100% - 24px));max-height:calc(100% - 24px)}
-dialog::backdrop{background:rgba(8,10,16,.55)}
-.dlg{padding:18px}
-.dlg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.dlg-head h2{margin:0;font-family:var(--display);font-size:20px}
-.fld{display:block;margin-bottom:12px}
-.fld>span{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px}
-.fld input,.fld select,.fld textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:9px 10px;font-size:16px}
-.fld textarea{resize:vertical}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
-.row2 .wide{grid-column:1/-1}
-.err{color:var(--danger);font-size:14px;min-height:20px;margin:0 0 6px}
-.dlg-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.sp{flex:1}
-.note{color:var(--muted);font-size:14px;margin:0 0 12px}
-.members{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:6px}
-.members li{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
-.members li span.n{flex:1;overflow-wrap:anywhere}
-.addrow{display:flex;gap:8px}
-.addrow input{flex:1;min-width:0;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:9px 10px;font-size:16px}
-textarea.code{width:100%;min-height:120px;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;margin-bottom:8px}
-h3.sec{font-family:var(--display);font-size:16px;margin:16px 0 6px}
-
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:50}
-.toast.show{opacity:1}
+:root{--paper:#F5F6F8;--panel:#FFF;--ink:#171B24;--muted:#5B6372;--line:#DCE0E7;--soft:#ECEEF2;--c:#0098CC;--m:#D6007A;--y:#E5B800;--k:#2B2F38;--danger:#C0173F;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-t]){--paper:#0E1117;--panel:#171B24;--ink:#EEF1F6;--muted:#9BA4B4;--line:#2B313D;--soft:#1F2430}}
+*{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Hind Siliguri',system-ui,sans-serif;font-size:16px}
+h1,h2{font-family:'Bricolage Grotesque','Hind Siliguri',sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:9px 16px;font-weight:600;min-height:40px}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button.danger{background:transparent;color:var(--danger);border-color:var(--line)}
+input,select,textarea{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:9px 10px;width:100%}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.center{max-width:380px;margin:60px auto;text-align:center}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;text-align:left}
+.fld{margin-bottom:12px}.fld span{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:600}
+.err{color:var(--danger);font-size:14px;min-height:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.top h1{margin:0;font-size:24px}
+.badge{background:var(--soft);border-radius:999px;padding:3px 12px;font-size:13px;color:var(--muted)}
+.board{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:900px){.board{grid-template-columns:repeat(4,1fr)}}
+.col h2{font-size:16px;margin:0 0 8px}
+.list{background:var(--soft);border-radius:12px;padding:8px;min-height:80px;display:flex;flex-direction:column;gap:8px}
+.t{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--cat,var(--k));border-radius:10px;padding:9px 11px}
+.t h3{margin:2px 0 6px;font-size:15px}
+.t .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;flex-wrap:wrap;gap:6px}
+.t .mv{display:flex;justify-content:flex-end;gap:6px;margin-top:6px}
+.t .mv button{min-height:30px;padding:2px 10px;font-size:14px}
+.pending{border:1px solid var(--line);border-radius:10px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+dialog{border:1px solid var(--line);border-radius:14px;padding:18px;width:min(480px,calc(100% - 24px));background:var(--panel);color:var(--ink)}
+dialog::backdrop{background:rgba(8,10,16,.5)}
+.foot{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.hide{display:none!important}
+.muted{color:var(--muted);font-size:14px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
-        <circle cx="11" cy="11" r="8" fill="var(--c)" opacity=".92"/>
-        <circle cx="23" cy="11" r="8" fill="var(--m)" opacity=".92"/>
-        <circle cx="11" cy="23" r="8" fill="var(--y)" opacity=".92"/>
-        <circle cx="23" cy="23" r="8" fill="var(--k)" opacity=".92"/>
-      </svg>
-      <div>
-        <h1>TeamFlow</h1>
-        <p data-i18n="sub"></p>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="btn ghost small" id="btnLang" aria-label="Language"></button>
-      <button class="btn ghost small" id="btnTeam" data-i18n="team"></button>
-      <button class="btn ghost small" id="btnData" data-i18n="data"></button>
-      <button class="btn small" id="btnNew" data-i18n="newTask"></button>
-    </div>
-  </header>
-
-  <p class="stats" id="stats"></p>
-
-  <div class="tools">
-    <input type="search" id="q" data-i18n-ph="search" data-i18n-aria="search">
-    <select id="who" data-i18n-aria="fWho"></select>
-    <div class="chips" id="chips"></div>
-  </div>
-
-  <main class="board" id="board"></main>
-</div>
-
-<!-- task dialog -->
+<div id="app" class="wrap"></div>
 <dialog id="taskDlg">
-  <div class="dlg">
-    <div class="dlg-head"><h2 id="taskHead"></h2><button class="icon" id="taskClose" data-i18n-aria="close">×</button></div>
-    <label class="fld"><span data-i18n="fTitle"></span><input id="fTitle" type="text" maxlength="120"></label>
-    <label class="fld"><span data-i18n="fDesc"></span><textarea id="fDesc" rows="3" maxlength="600"></textarea></label>
-    <div class="row2">
-      <label class="fld"><span data-i18n="fCat"></span><select id="fCat"></select></label>
-      <label class="fld"><span data-i18n="fWho"></span><select id="fWho"></select></label>
-      <label class="fld"><span data-i18n="fStage"></span><select id="fStage"></select></label>
-      <label class="fld"><span data-i18n="fPri"></span><select id="fPri"></select></label>
-      <label class="fld wide"><span data-i18n="fDue"></span><input id="fDue" type="date"></label>
-    </div>
-    <p class="err" id="fErr" role="alert"></p>
-    <div class="dlg-foot">
-      <button class="btn danger" id="delTask"></button>
-      <span class="sp"></span>
-      <button class="btn ghost" id="cancelTask" data-i18n="cancel"></button>
-      <button class="btn" id="saveTask" data-i18n="save"></button>
-    </div>
+  <h2 id="dTitle" style="margin:0 0 10px"></h2>
+  <div class="fld"><span>কাজের নাম</span><input id="fTitle" maxlength="120"></div>
+  <div class="fld"><span>ধরন</span><select id="fCat">
+    <option value="graphic">গ্রাফিক</option><option value="video">ভিডিও</option><option value="social">সোশ্যাল</option><option value="web">ওয়েব</option>
+  </select></div>
+  <div class="fld"><span>দায়িত্বে</span><select id="fWho"></select></div>
+  <div class="fld"><span>ধাপ</span><select id="fStage">
+    <option value="todo">করার কাজ</option><option value="doing">চলছে</option><option value="review">রিভিউ</option><option value="done">শেষ</option>
+  </select></div>
+  <div class="fld"><span>জরুরি</span><select id="fPri"><option value="normal">সাধারণ</option><option value="urgent">জরুরি</option></select></div>
+  <div class="fld"><span>শেষ তারিখ</span><input id="fDue" type="date"></div>
+  <p class="err" id="fErr"></p>
+  <div class="foot">
+    <button class="danger hide" id="delT">মুছুন</button>
+    <button class="ghost" id="cancelT">বাতিল</button>
+    <button id="saveT">সেভ</button>
   </div>
 </dialog>
-
-<!-- team dialog -->
-<dialog id="teamDlg">
-  <div class="dlg">
-    <div class="dlg-head"><h2 data-i18n="teamTitle"></h2><button class="icon" id="teamClose" data-i18n-aria="close">×</button></div>
-    <ul class="members" id="memberList"></ul>
-    <div class="addrow">
-      <input id="memberName" type="text" maxlength="40" data-i18n-ph="memberName" data-i18n-aria="memberName">
-      <button class="btn" id="addMember" data-i18n="addMember"></button>
-    </div>
-  </div>
-</dialog>
-
-<!-- data dialog -->
-<dialog id="dataDlg">
-  <div class="dlg">
-    <div class="dlg-head"><h2 data-i18n="dataTitle"></h2><button class="icon" id="dataClose" data-i18n-aria="close">×</button></div>
-    <p class="note" data-i18n="dataNote"></p>
-    <h3 class="sec" data-i18n="export"></h3>
-    <textarea class="code" id="exportBox" readonly></textarea>
-    <button class="btn ghost small" id="copyBtn" data-i18n="copy"></button>
-    <h3 class="sec" data-i18n="import"></h3>
-    <textarea class="code" id="importBox" data-i18n-ph="importPh"></textarea>
-    <p class="err" id="importErr" role="alert"></p>
-    <div class="dlg-foot">
-      <button class="btn danger" id="resetBtn"></button>
-      <span class="sp"></span>
-      <button class="btn" id="importBtn"></button>
-    </div>
-  </div>
-</dialog>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-
 <script>
-(function(){
-'use strict';
+const SB_URL='https://fkmkmxiprdxomapqvtph.supabase.co';
+const SB_KEY='sb_publishable_cYFyeRjqpCPlmO5uqlwUKQ_CSuyHx0U';
+const ADMIN='ashrafulsabbir02@gmail.com';
+const CAT={graphic:'গ্রাফিক',video:'ভিডিও',social:'সোশ্যাল',web:'ওয়েব'};
+const CATV={graphic:'--c',video:'--m',social:'--y',web:'--k'};
+const STAGE={todo:'করার কাজ',doing:'চলছে',review:'রিভিউ',done:'শেষ'};
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+const app = document.getElementById('app');
+let session=null, profile=null, editingId=null;
 
-var KEY = 'teamflow.v2';
-var STAGES = ['todo','doing','review','done'];
-var CATS = ['graphic','video','social','web'];
-var CAT_VAR = {graphic:'--c', video:'--m', social:'--y', web:'--k'};
+function el(t,p,...k){const e=document.createElement(t);p=p||{};for(const x in p){if(x==='html')e.innerHTML=p[x];else if(x==='class')e.className=p[x];else if(x.startsWith('on'))e.addEventListener(x.slice(2),p[x]);else e.setAttribute(x,p[x]);}k.flat().forEach(c=>{if(c==null)return;e.append(c.nodeType?c:document.createTextNode(c));});return e;}
 
-var T = {
-  bn: {
-    sub:'ভিজ্যুয়াল ও ব্র্যান্ডিং টিমের কাজের বোর্ড',
-    newTask:'নতুন কাজ', team:'টিম', data:'ডেটা',
-    search:'কাজ খুঁজুন', allCats:'সব ধরন', anyone:'সবাই', noOne:'দায়িত্ব নেই',
-    stTotal:'মোট কাজ', stSoon:'৩ দিনের মধ্যে', stLate:'সময় পেরিয়ে গেছে',
-    todo:'করার কাজ', doing:'চলছে', review:'রিভিউ', done:'শেষ',
-    graphic:'গ্রাফিক', video:'ভিডিও', social:'সোশ্যাল', web:'ওয়েব',
-    normal:'সাধারণ', urgent:'জরুরি',
-    empty:'এই ধাপে কোনো কাজ নেই',
-    addTaskTitle:'নতুন কাজ যোগ করুন', editTask:'কাজ সম্পাদনা',
-    fTitle:'কাজের নাম', fDesc:'বিবরণ', fCat:'ধরন', fWho:'দায়িত্বে', fPri:'গুরুত্ব', fStage:'ধাপ', fDue:'শেষ তারিখ',
-    none:'কেউ নয়',
-    save:'সেভ করুন', cancel:'বাতিল', del:'কাজ মুছুন', delSure:'আবার চাপলে মুছে যাবে', close:'বন্ধ করুন',
-    titleReq:'কাজের নাম লিখুন',
-    teamTitle:'টিম সদস্য', memberName:'সদস্যের নাম', addMember:'যোগ করুন', removeMember:'সরান', noMembers:'এখনো কোনো সদস্য নেই',
-    dataTitle:'বোর্ডের ডেটা',
-    dataNote:'বোর্ডের সব ডেটা শুধু এই ব্রাউজারে থাকে। অন্য কারো সাথে ভাগ করতে নিচের লেখাটা কপি করে পাঠান, আর তিনি ইমপোর্ট অংশে বসিয়ে দেবেন।',
-    export:'এক্সপোর্ট', copy:'কপি করুন', copied:'কপি হয়েছে',
-    import:'ইমপোর্ট', importBtn:'ইমপোর্ট করুন', importSure:'আবার চাপলে বর্তমান বোর্ড বদলে যাবে',
-    importBad:'ডেটাটা ঠিক নেই। এক্সপোর্ট করা পুরো লেখাটা বসান।', imported:'ইমপোর্ট হয়েছে',
-    importPh:'এখানে এক্সপোর্ট করা লেখা বসান',
-    reset:'সব কাজ মুছে নতুন করে শুরু', resetSure:'আবার চাপলে সব কাজ মুছে যাবে', resetDone:'বোর্ড খালি হয়েছে',
-    today:'আজ', tomorrow:'কাল', late:function(n){return n+' দিন দেরি';},
-    prev:'আগের ধাপে নিন', next:'পরের ধাপে নিন', saved:'সেভ হয়েছে', deleted:'কাজ মুছে গেছে',
-    langBtn:'EN'
-  },
-  en: {
-    sub:'Task board for the visual & branding team',
-    newTask:'New task', team:'Team', data:'Data',
-    search:'Search tasks', allCats:'All types', anyone:'Everyone', noOne:'Unassigned',
-    stTotal:'Total tasks', stSoon:'Due in 3 days', stLate:'Overdue',
-    todo:'To do', doing:'In progress', review:'Review', done:'Done',
-    graphic:'Graphic', video:'Video', social:'Social', web:'Web',
-    normal:'Normal', urgent:'Urgent',
-    empty:'No tasks in this stage',
-    addTaskTitle:'Add a task', editTask:'Edit task',
-    fTitle:'Task name', fDesc:'Details', fCat:'Type', fWho:'Assigned to', fPri:'Priority', fStage:'Stage', fDue:'Due date',
-    none:'Nobody',
-    save:'Save task', cancel:'Cancel', del:'Delete task', delSure:'Press again to delete', close:'Close',
-    titleReq:'Enter a task name',
-    teamTitle:'Team members', memberName:'Member name', addMember:'Add', removeMember:'Remove', noMembers:'No members yet',
-    dataTitle:'Board data',
-    dataNote:'All board data stays in this browser only. To share it, copy the text below and send it; the other person pastes it into the import box.',
-    export:'Export', copy:'Copy', copied:'Copied',
-    import:'Import', importBtn:'Import', importSure:'Press again to replace the current board',
-    importBad:'That data is not valid. Paste the whole exported text.', imported:'Imported',
-    importPh:'Paste exported text here',
-    reset:'Delete all tasks and start fresh', resetSure:'Press again to delete all tasks', resetDone:'Board cleared',
-    today:'Today', tomorrow:'Tomorrow', late:function(n){return n+(n===1?' day late':' days late');},
-    prev:'Move to previous stage', next:'Move to next stage', saved:'Saved', deleted:'Task deleted',
-    langBtn:'বাংলা'
+async function boot(){
+  const {data:{session:s}} = await sb.auth.getSession();
+  session = s;
+  sb.auth.onAuthStateChange((_e,s2)=>{ session=s2; render(); });
+  await render();
+}
+
+async function loadProfile(){
+  if(!session) return null;
+  let {data} = await sb.from('profiles').select('*').eq('id',session.user.id).maybeSingle();
+  if(!data){
+    const ins = await sb.from('profiles').insert({id:session.user.id, email:session.user.email, full_name:session.user.user_metadata?.full_name||session.user.email}).select().maybeSingle();
+    data = ins.data;
   }
-};
-
-/* ---------- state ---------- */
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-function iso(d){ var z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); }
-function inDays(n){ var d = new Date(); d.setDate(d.getDate()+n); return iso(d); }
-
-function seed(){
-  var me = {id:uid(), name:'Sabbir'};
-  var now = Date.now();
-  function mk(title,cat,stage,pri,due,desc,i){
-    return {id:uid(), title:title, desc:desc||'', cat:cat, who:me.id, pri:pri, stage:stage, due:due, created:now+i};
-  }
-  return {
-    lang:'bn',
-    members:[me],
-    tasks:[
-      mk('মাসিক কন্টেন্ট ক্যালেন্ডারের পোস্ট ডিজাইন','social','doing','normal',inDays(2),'',1),
-      mk('ইভেন্টের ফেসবুক কভার ব্যানার','graphic','todo','urgent',inDays(4),'',2),
-      mk('প্রেজেন্টেশন স্লাইড রিভিউ','graphic','review','normal',inDays(1),'',3),
-      mk('রিক্রুটমেন্ট প্রমো ভিডিও এডিট','video','todo','normal',inDays(9),'',4),
-      mk('ওয়েবসাইট হোম ব্যানার আপডেট','web','done','normal',inDays(-2),'',5)
-    ]
-  };
-}
-function load(){
-  try{
-    var raw = localStorage.getItem(KEY);
-    if(raw){
-      var s = JSON.parse(raw);
-      if(s && Array.isArray(s.tasks) && Array.isArray(s.members)) { if(!s.lang) s.lang='bn'; return s; }
-    }
-  }catch(e){}
-  return seed();
-}
-var state = load();
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
-
-var ui = { q:'', cat:'all', who:'all', editing:null, newStage:'todo' };
-
-function t(k){ return T[state.lang][k]; }
-function nf(n){ return new Intl.NumberFormat(state.lang==='bn'?'bn-BD':'en').format(n); }
-
-/* ---------- helpers ---------- */
-function h(tag, props){
-  var e = document.createElement(tag);
-  props = props || {};
-  Object.keys(props).forEach(function(k){
-    var v = props[k];
-    if(v===false || v==null) return;
-    if(k==='class') e.className = v;
-    else if(k==='text') e.textContent = v;
-    else if(k.indexOf('on')===0) e.addEventListener(k.slice(2), v);
-    else e.setAttribute(k, v===true ? '' : v);
-  });
-  for(var i=2;i<arguments.length;i++){
-    var kids = [].concat(arguments[i]);
-    kids.forEach(function(c){
-      if(c==null || c===false) return;
-      e.append(c.nodeType ? c : document.createTextNode(c));
-    });
-  }
-  return e;
-}
-function $(id){ return document.getElementById(id); }
-
-function daysLeft(due){
-  if(!due) return null;
-  var a = new Date(due+'T00:00:00');
-  var b = new Date(); b.setHours(0,0,0,0);
-  return Math.round((a-b)/86400000);
-}
-function fmtDate(due){
-  try{
-    return new Intl.DateTimeFormat(state.lang==='bn'?'bn-BD':'en-GB', {day:'numeric', month:'short'}).format(new Date(due+'T00:00:00'));
-  }catch(e){ return due; }
-}
-function sortTasks(a,b){
-  if((a.pri==='urgent') !== (b.pri==='urgent')) return a.pri==='urgent' ? -1 : 1;
-  if(a.due && b.due && a.due!==b.due) return a.due<b.due ? -1 : 1;
-  if(a.due && !b.due) return -1;
-  if(!a.due && b.due) return 1;
-  return a.created - b.created;
-}
-var toastTimer;
-function toast(msg){
-  var el = $('toast'); el.textContent = msg; el.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1800);
-}
-function twoStep(btn, idleKey, sureKey, fn){
-  var armed = false, timer;
-  function reset(){ armed=false; clearTimeout(timer); btn.removeAttribute('data-armed'); btn.textContent = t(idleKey); }
-  btn.addEventListener('click', function(){
-    if(!armed){ armed=true; btn.setAttribute('data-armed','1'); btn.textContent = t(sureKey); timer = setTimeout(reset, 3500); }
-    else { reset(); fn(); }
-  });
-  btn._reset = reset;
+  return data;
 }
 
-/* ---------- i18n chrome ---------- */
-function applyI18n(){
-  document.documentElement.lang = state.lang;
-  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
-  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){ el.placeholder = t(el.getAttribute('data-i18n-ph')); });
-  document.querySelectorAll('[data-i18n-aria]').forEach(function(el){ el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
-  $('btnLang').textContent = t('langBtn');
-  $('delTask')._reset(); $('importBtn')._reset(); $('resetBtn')._reset();
+async function render(){
+  app.textContent='';
+  if(!session){ renderAuth(); return; }
+  profile = await loadProfile();
+  const isAdmin = session.user.email===ADMIN;
+  if(!isAdmin && !(profile && profile.approved)){ renderWaiting(); return; }
+  renderBoard(isAdmin);
 }
 
-/* ---------- render ---------- */
-function matches(tk){
-  if(ui.cat!=='all' && tk.cat!==ui.cat) return false;
-  if(ui.who==='none' && tk.who) return false;
-  if(ui.who!=='all' && ui.who!=='none' && tk.who!==ui.who) return false;
-  if(ui.q){
-    var q = ui.q.toLowerCase();
-    if((tk.title+' '+(tk.desc||'')).toLowerCase().indexOf(q)===-1) return false;
-  }
-  return true;
-}
-
-function renderStats(){
-  var open = state.tasks.filter(function(x){ return x.stage!=='done'; });
-  var soon = open.filter(function(x){ var d=daysLeft(x.due); return d!==null && d>=0 && d<=3; }).length;
-  var late = open.filter(function(x){ var d=daysLeft(x.due); return d!==null && d<0; }).length;
-  var el = $('stats'); el.textContent = '';
-  el.append(
-    h('span',{}, h('b',{text:nf(state.tasks.length)}), t('stTotal')),
-    h('span',{}, h('b',{text:nf(soon)}), t('stSoon')),
-    h('span',{class:'late'}, h('b',{text:nf(late)}), t('stLate'))
-  );
-}
-
-function renderFilters(){
-  var sel = $('who'); sel.textContent = '';
-  sel.append(h('option',{value:'all',text:t('anyone')}), h('option',{value:'none',text:t('noOne')}));
-  state.members.forEach(function(m){ sel.append(h('option',{value:m.id,text:m.name})); });
-  if(ui.who!=='all' && ui.who!=='none' && !state.members.some(function(m){return m.id===ui.who;})) ui.who='all';
-  sel.value = ui.who;
-
-  var chips = $('chips'); chips.textContent = '';
-  var all = h('button',{class:'chip','aria-pressed':String(ui.cat==='all'),text:t('allCats'),onclick:function(){ ui.cat='all'; render(); }});
-  chips.append(all);
-  CATS.forEach(function(c){
-    chips.append(h('button',{class:'chip','aria-pressed':String(ui.cat===c),style:'--cat:var('+CAT_VAR[c]+')',onclick:function(){ ui.cat = (ui.cat===c?'all':c); render(); }},
-      h('span',{class:'dot'}), t(c)));
-  });
-}
-
-function cardEl(tk){
-  var idx = STAGES.indexOf(tk.stage);
-  var who = state.members.filter(function(m){ return m.id===tk.who; })[0];
-  var d = daysLeft(tk.due);
-  var dueEl = null;
-  if(tk.due){
-    var label, cls='due';
-    if(tk.stage!=='done' && d<0){ label = t('late')(nf(Math.abs(d))); cls+=' late'; }
-    else if(tk.stage!=='done' && d===0){ label = t('today'); }
-    else if(tk.stage!=='done' && d===1){ label = t('tomorrow'); }
-    else { label = fmtDate(tk.due); }
-    dueEl = h('span',{class:cls,text:label});
-  }
-  var card = h('article',{class:'card',draggable:'true','data-id':tk.id,tabindex:'0',role:'button','aria-label':tk.title,style:'--cat:var('+(CAT_VAR[tk.cat]||'--k')+')'},
-    h('div',{class:'card-top'},
-      h('span',{text:t(tk.cat)}),
-      tk.pri==='urgent' ? h('span',{class:'tag-urgent',text:t('urgent')}) : null
-    ),
-    h('h3',{text:tk.title}),
-    h('div',{class:'card-meta'},
-      who ? h('span',{class:'who'}, h('span',{class:'avatar',text:Array.from(who.name)[0]||'?'}), h('span',{text:who.name})) : null,
-      dueEl
-    ),
-    h('div',{class:'card-move'},
-      h('button',{class:'icon',type:'button','aria-label':t('prev'),disabled:idx===0,text:'‹',onclick:function(e){ e.stopPropagation(); moveTask(tk.id,-1); }}),
-      h('button',{class:'icon',type:'button','aria-label':t('next'),disabled:idx===STAGES.length-1,text:'›',onclick:function(e){ e.stopPropagation(); moveTask(tk.id,1); }})
+function renderAuth(){
+  const errBox = el('p',{class:'err'});
+  const email = el('input',{type:'email',placeholder:'ইমেইল'});
+  const pass = el('input',{type:'password',placeholder:'পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)'});
+  const name = el('input',{type:'text',placeholder:'নাম'});
+  const box = el('div',{class:'card'},
+    el('h1',{},'TeamFlow'),
+    el('p',{class:'muted'},'সাইন আপ করো অথবা লগইন করো।'),
+    el('div',{class:'fld'}, el('span',{},'নাম'), name),
+    el('div',{class:'fld'}, el('span',{},'ইমেইল'), email),
+    el('div',{class:'fld'}, el('span',{},'পাসওয়ার্ড'), pass),
+    errBox,
+    el('div',{style:'display:flex;gap:8px;flex-wrap:wrap'},
+      el('button',{onclick:async ()=>{
+        errBox.textContent='';
+        const {error} = await sb.auth.signUp({email:email.value.trim(),password:pass.value,options:{data:{full_name:name.value.trim()}}});
+        if(error) errBox.textContent = error.message;
+        else errBox.textContent = 'অ্যাকাউন্ট তৈরি হয়েছে। এখন লগইন করো।';
+      }}, 'সাইন আপ'),
+      el('button',{class:'ghost',onclick:async ()=>{
+        errBox.textContent='';
+        const {error} = await sb.auth.signInWithPassword({email:email.value.trim(),password:pass.value});
+        if(error) errBox.textContent = error.message;
+      }}, 'লগইন')
     )
   );
-  card.addEventListener('click', function(){ openTask(tk.id); });
-  card.addEventListener('keydown', function(e){ if((e.key==='Enter'||e.key===' ') && e.target===card){ e.preventDefault(); openTask(tk.id); } });
-  card.addEventListener('dragstart', function(e){
-    e.dataTransfer.setData('text/plain', tk.id); e.dataTransfer.effectAllowed='move'; card.classList.add('dragging');
-  });
-  card.addEventListener('dragend', function(){ card.classList.remove('dragging'); });
-  return card;
+  app.append(el('div',{class:'center'}, box));
 }
 
-function renderBoard(){
-  var board = $('board'); board.textContent = '';
-  STAGES.forEach(function(st, i){
-    var items = state.tasks.filter(function(x){ return x.stage===st && matches(x); }).sort(sortTasks);
-    var prog = h('div',{class:'prog','aria-hidden':'true'});
-    for(var k=0;k<STAGES.length;k++) prog.append(h('span',{class:k<=i?'on':''}));
-    var list = h('div',{class:'list','data-stage':st});
-    if(items.length===0) list.append(h('div',{class:'empty',text:t('empty')}));
-    items.forEach(function(tk){ list.append(cardEl(tk)); });
-    list.addEventListener('dragover', function(e){ e.preventDefault(); list.classList.add('over'); });
-    list.addEventListener('dragleave', function(e){ if(!list.contains(e.relatedTarget)) list.classList.remove('over'); });
-    list.addEventListener('drop', function(e){
-      e.preventDefault(); list.classList.remove('over');
-      var id = e.dataTransfer.getData('text/plain');
-      var tk = state.tasks.filter(function(x){ return x.id===id; })[0];
-      if(tk && tk.stage!==st){ tk.stage = st; save(); render(); }
-    });
-    board.append(h('section',{class:'col'},
-      h('div',{class:'col-head'},
-        h('h2',{text:t(st)}),
-        h('span',{class:'count',text:nf(items.length)}),
-        h('button',{class:'icon',type:'button','aria-label':t('newTask')+' – '+t(st),text:'+',onclick:function(){ openTask(null, st); }})
-      ),
-      prog, list
-    ));
-  });
+function renderWaiting(){
+  app.append(el('div',{class:'center'},
+    el('div',{class:'card'},
+      el('h1',{},'অপেক্ষায় আছো'),
+      el('p',{class:'muted'},'তোমার অ্যাকাউন্ট তৈরি হয়েছে, এখন অ্যাডমিনের অনুমোদনের অপেক্ষায়। অনুমোদন হলে এই পেজ রিফ্রেশ করলেই বোর্ড দেখতে পাবে।'),
+      el('button',{class:'ghost',onclick:()=>location.reload()},'রিফ্রেশ'),
+      el('button',{class:'ghost',style:'margin-left:8px',onclick:()=>sb.auth.signOut()},'লগআউট')
+    )
+  ));
 }
 
-function render(){
-  applyI18n(); renderStats(); renderFilters(); renderBoard();
-}
+async function renderBoard(isAdmin){
+  const {data:profiles} = await sb.from('profiles').select('*').order('created_at');
+  const {data:tasks} = await sb.from('tasks').select('*').order('created_at');
+  const nameOf = id => (profiles||[]).find(p=>p.id===id)?.full_name || (profiles||[]).find(p=>p.id===id)?.email || '';
 
-/* ---------- tasks ---------- */
-function moveTask(id, dir){
-  var tk = state.tasks.filter(function(x){ return x.id===id; })[0]; if(!tk) return;
-  var i = STAGES.indexOf(tk.stage) + dir;
-  if(i<0 || i>=STAGES.length) return;
-  tk.stage = STAGES[i]; save(); render();
-}
+  const top = el('div',{class:'top'},
+    el('h1',{},'TeamFlow'),
+    el('div',{style:'display:flex;gap:8px;align-items:center'},
+      el('span',{class:'badge'}, session.user.email + (isAdmin?' · অ্যাডমিন':'')),
+      el('button',{class:'ghost',onclick:()=>openTask(null)},'+ নতুন কাজ'),
+      el('button',{class:'ghost',onclick:()=>sb.auth.signOut()},'লগআউট')
+    )
+  );
+  app.append(top);
 
-function fillSelect(sel, opts, value){
-  sel.textContent = '';
-  opts.forEach(function(o){ sel.append(h('option',{value:o[0],text:o[1]})); });
-  sel.value = value;
-}
-
-function openTask(id, stage){
-  var tk = id ? state.tasks.filter(function(x){ return x.id===id; })[0] : null;
-  ui.editing = tk ? tk.id : null;
-  $('taskHead').textContent = tk ? t('editTask') : t('addTaskTitle');
-  $('fTitle').value = tk ? tk.title : '';
-  $('fDesc').value = tk ? (tk.desc||'') : '';
-  fillSelect($('fCat'), CATS.map(function(c){ return [c,t(c)]; }), tk ? tk.cat : (CATS.indexOf(ui.cat)>-1 ? ui.cat : 'graphic'));
-  fillSelect($('fWho'), [['',t('none')]].concat(state.members.map(function(m){ return [m.id,m.name]; })), tk ? (tk.who||'') : '');
-  fillSelect($('fStage'), STAGES.map(function(s){ return [s,t(s)]; }), tk ? tk.stage : (stage||'todo'));
-  fillSelect($('fPri'), [['normal',t('normal')],['urgent',t('urgent')]], tk ? tk.pri : 'normal');
-  $('fDue').value = tk ? (tk.due||'') : '';
-  $('fErr').textContent = '';
-  $('delTask').hidden = !tk; $('delTask')._reset();
-  $('taskDlg').showModal();
-  if(!tk) $('fTitle').focus();
-}
-
-function saveTask(){
-  var title = $('fTitle').value.trim();
-  if(!title){ $('fErr').textContent = t('titleReq'); $('fTitle').focus(); return; }
-  var data = {
-    title:title, desc:$('fDesc').value.trim(), cat:$('fCat').value, who:$('fWho').value,
-    pri:$('fPri').value, stage:$('fStage').value, due:$('fDue').value
-  };
-  if(ui.editing){
-    var tk = state.tasks.filter(function(x){ return x.id===ui.editing; })[0];
-    if(tk) Object.keys(data).forEach(function(k){ tk[k]=data[k]; });
-  } else {
-    data.id = uid(); data.created = Date.now(); state.tasks.push(data);
-  }
-  save(); $('taskDlg').close(); render(); toast(t('saved'));
-}
-
-/* ---------- team ---------- */
-function renderMembers(){
-  var ul = $('memberList'); ul.textContent = '';
-  if(state.members.length===0){ ul.append(h('li',{}, h('span',{class:'n',text:t('noMembers')}))); return; }
-  state.members.forEach(function(m){
-    ul.append(h('li',{},
-      h('span',{class:'avatar',text:Array.from(m.name)[0]||'?'}),
-      h('span',{class:'n',text:m.name}),
-      h('button',{class:'btn ghost small',type:'button',text:t('removeMember'),onclick:function(){
-        state.members = state.members.filter(function(x){ return x.id!==m.id; });
-        state.tasks.forEach(function(tk){ if(tk.who===m.id) tk.who=''; });
-        save(); renderMembers(); render();
-      }})
-    ));
-  });
-}
-function addMember(){
-  var inp = $('memberName'); var name = inp.value.trim(); if(!name) return;
-  state.members.push({id:uid(), name:name}); inp.value=''; save(); renderMembers(); render();
-}
-
-/* ---------- data ---------- */
-function exportJSON(){ return JSON.stringify({v:2, members:state.members, tasks:state.tasks}, null, 1); }
-function openData(){
-  $('exportBox').value = exportJSON(); $('importBox').value=''; $('importErr').textContent='';
-  $('importBtn')._reset(); $('resetBtn')._reset(); $('dataDlg').showModal();
-}
-function copyExport(){
-  var el = $('exportBox');
-  var done = function(){ toast(t('copied')); };
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(el.value).then(done, function(){ el.select(); try{ document.execCommand('copy'); }catch(e){} done(); });
-  } else { el.select(); try{ document.execCommand('copy'); }catch(e){} done(); }
-}
-function doImport(){
-  try{
-    var s = JSON.parse($('importBox').value);
-    if(!s || !Array.isArray(s.tasks) || !Array.isArray(s.members)) throw new Error('shape');
-    var members = s.members.filter(function(m){ return m && typeof m.name==='string' && m.name.trim(); })
-      .map(function(m){ return {id:String(m.id||uid()), name:m.name.trim().slice(0,40)}; });
-    var tasks = s.tasks.filter(function(x){ return x && typeof x.title==='string' && x.title.trim(); })
-      .map(function(x, i){ return {
-        id:String(x.id||uid()), title:x.title.trim().slice(0,120), desc:typeof x.desc==='string'?x.desc.slice(0,600):'',
-        cat:CATS.indexOf(x.cat)>-1?x.cat:'graphic', who:typeof x.who==='string'?x.who:'',
-        pri:x.pri==='urgent'?'urgent':'normal', stage:STAGES.indexOf(x.stage)>-1?x.stage:'todo',
-        due:/^\d{4}-\d{2}-\d{2}$/.test(x.due||'')?x.due:'', created:Number(x.created)||Date.now()+i };
+  if(isAdmin){
+    const pend = (profiles||[]).filter(p=>!p.approved && p.email!==ADMIN);
+    if(pend.length){
+      const box = el('div',{class:'card',style:'margin-bottom:16px'}, el('h2',{style:'margin:0 0 8px;font-size:16px'},'অনুমোদনের অপেক্ষায় ('+pend.length+')'));
+      pend.forEach(p=>{
+        box.append(el('div',{class:'pending'},
+          el('span',{}, p.full_name || p.email, el('br'), el('span',{class:'muted'},p.email)),
+          el('div',{style:'display:flex;gap:6px'},
+            el('button',{onclick:async()=>{ await sb.from('profiles').update({approved:true}).eq('id',p.id); render(); }},'অ্যাপ্রুভ'),
+            el('button',{class:'danger',onclick:async()=>{ await sb.from('profiles').delete().eq('id',p.id); render(); }},'বাতিল')
+          )
+        ));
       });
-    state.members = members; state.tasks = tasks; save(); render();
-    $('dataDlg').close(); toast(t('imported'));
-  }catch(e){ $('importErr').textContent = t('importBad'); }
+      app.append(box);
+    }
+  }
+
+  const board = el('div',{class:'board'});
+  Object.keys(STAGE).forEach(st=>{
+    const items = (tasks||[]).filter(x=>x.stage===st);
+    const list = el('div',{class:'list'});
+    if(!items.length) list.append(el('p',{class:'muted',style:'text-align:center;padding:14px'},'কোনো কাজ নেই'));
+    items.forEach(tk=>{
+      const idx = Object.keys(STAGE).indexOf(st);
+      const card = el('div',{class:'t',style:'--cat:var('+CATV[tk.cat]+')',onclick:()=>openTask(tk)},
+        el('div',{class:'meta'}, CAT[tk.cat], tk.pri==='urgent'?el('b',{style:'color:var(--danger)'},'জরুরি'):''),
+        el('h3',{},tk.title),
+        el('div',{class:'meta'}, nameOf(tk.who)||'—', tk.due||''),
+        el('div',{class:'mv'},
+          el('button',{class:'ghost',disabled:idx===0,onclick:async(e)=>{e.stopPropagation();await moveStage(tk,-1);}},'‹'),
+          el('button',{class:'ghost',disabled:idx===3,onclick:async(e)=>{e.stopPropagation();await moveStage(tk,1);}},'›')
+        )
+      );
+      list.append(card);
+    });
+    board.append(el('div',{class:'col'}, el('h2',{},STAGE[st]+' ('+items.length+')'), list));
+  });
+  app.append(board);
+
+  window._profiles = profiles||[];
 }
 
-/* ---------- wire up ---------- */
-twoStep($('delTask'), 'del', 'delSure', function(){
-  state.tasks = state.tasks.filter(function(x){ return x.id!==ui.editing; });
-  save(); $('taskDlg').close(); render(); toast(t('deleted'));
-});
-twoStep($('importBtn'), 'importBtn', 'importSure', doImport);
-twoStep($('resetBtn'), 'reset', 'resetSure', function(){
-  state.tasks = []; save(); render(); $('dataDlg').close(); toast(t('resetDone'));
-});
+async function moveStage(tk,dir){
+  const keys=Object.keys(STAGE); const i=keys.indexOf(tk.stage)+dir;
+  if(i<0||i>3) return;
+  await sb.from('tasks').update({stage:keys[i]}).eq('id',tk.id);
+  render();
+}
 
-$('btnNew').addEventListener('click', function(){ openTask(null,'todo'); });
-$('btnTeam').addEventListener('click', function(){ renderMembers(); $('teamDlg').showModal(); });
-$('btnData').addEventListener('click', openData);
-$('btnLang').addEventListener('click', function(){ state.lang = state.lang==='bn' ? 'en' : 'bn'; save(); render(); });
-$('q').addEventListener('input', function(e){ ui.q = e.target.value.trim(); renderBoard(); });
-$('who').addEventListener('change', function(e){ ui.who = e.target.value; renderBoard(); });
-$('saveTask').addEventListener('click', saveTask);
-$('cancelTask').addEventListener('click', function(){ $('taskDlg').close(); });
-$('taskClose').addEventListener('click', function(){ $('taskDlg').close(); });
-$('fTitle').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); saveTask(); } });
-$('teamClose').addEventListener('click', function(){ $('teamDlg').close(); });
-$('dataClose').addEventListener('click', function(){ $('dataDlg').close(); });
-$('addMember').addEventListener('click', addMember);
-$('memberName').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); addMember(); } });
-$('copyBtn').addEventListener('click', copyExport);
-['taskDlg','teamDlg','dataDlg'].forEach(function(id){
-  var d = $(id);
-  d.addEventListener('click', function(e){ if(e.target===d) d.close(); });
-});
+function openTask(tk){
+  editingId = tk ? tk.id : null;
+  document.getElementById('dTitle').textContent = tk ? 'কাজ সম্পাদনা' : 'নতুন কাজ';
+  document.getElementById('fTitle').value = tk ? tk.title : '';
+  document.getElementById('fCat').value = tk ? tk.cat : 'graphic';
+  document.getElementById('fStage').value = tk ? tk.stage : 'todo';
+  document.getElementById('fPri').value = tk ? tk.pri : 'normal';
+  document.getElementById('fDue').value = tk ? (tk.due||'') : '';
+  document.getElementById('fErr').textContent='';
+  const who = document.getElementById('fWho'); who.textContent='';
+  who.append(el('option',{value:''},'কেউ না'));
+  (window._profiles||[]).forEach(p=>who.append(el('option',{value:p.id},p.full_name||p.email)));
+  who.value = tk ? (tk.who||'') : '';
+  document.getElementById('delT').classList.toggle('hide', !tk);
+  document.getElementById('taskDlg').showModal();
+}
+document.getElementById('cancelT').onclick=()=>document.getElementById('taskDlg').close();
+document.getElementById('saveT').onclick=async()=>{
+  const title=document.getElementById('fTitle').value.trim();
+  if(!title){ document.getElementById('fErr').textContent='কাজের নাম দাও'; return; }
+  const data={title, cat:document.getElementById('fCat').value, who:document.getElementById('fWho').value||null,
+    stage:document.getElementById('fStage').value, pri:document.getElementById('fPri').value, due:document.getElementById('fDue').value||null};
+  if(editingId) await sb.from('tasks').update(data).eq('id',editingId);
+  else await sb.from('tasks').insert(data);
+  document.getElementById('taskDlg').close(); render();
+};
+document.getElementById('delT').onclick=async()=>{
+  if(editingId) await sb.from('tasks').delete().eq('id',editingId);
+  document.getElementById('taskDlg').close(); render();
+};
 
-render();
-})();
+boot();
 </script>
 </body>
 </html>
