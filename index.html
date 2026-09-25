@@ -89,7 +89,7 @@ const CAT={graphic:'গ্রাফিক ডিজাইন',video:'ভিড�
 const STAGE={todo:'করার কাজ',doing:'চলছে',review:'রিভিউ',done:'শেষ'};
 const sb = window.supabase.createClient(SB_URL, SB_KEY);
 const app = document.getElementById('app');
-let session=null, profile=null, editingId=null, curFileMeta=null, removeFile=false;
+let session=null, profile=null, editingId=null, curFileMeta=null, removeFile=false, gIsAdmin=false;
 
 function el(t,p,...k){const e=document.createElement(t);p=p||{};for(const x in p){if(x==='html')e.innerHTML=p[x];else if(x==='class')e.className=p[x];else if(x.startsWith('on'))e.addEventListener(x.slice(2),p[x]);else e.setAttribute(x,p[x]);}k.flat().forEach(c=>{if(c==null)return;e.append(c.nodeType?c:document.createTextNode(c));});return e;}
 
@@ -115,6 +115,7 @@ async function render(){
   if(!session){ renderAuth(); return; }
   profile = await loadProfile();
   const isAdmin = session.user.email===ADMIN || (profile && profile.is_admin);
+  gIsAdmin = isAdmin;
   if(!isAdmin && !(profile && profile.approved)){ renderWaiting(); return; }
   renderBoard(isAdmin);
 }
@@ -170,7 +171,7 @@ async function renderBoard(isAdmin){
     el('h1',{}, el('span',{style:'width:12px;height:12px;border-radius:4px;background:linear-gradient(135deg,var(--graphic),var(--video),var(--pres))'}), 'TeamFlow'),
     el('div',{style:'display:flex;gap:8px;align-items:center;flex-wrap:wrap'},
       el('span',{class:'badge'}, session.user.email + (isAdmin?' · অ্যাডমিন':'')),
-      el('button',{class:'ghost',onclick:()=>openTask(null)},'+ নতুন কাজ'),
+      isAdmin ? el('button',{class:'ghost',onclick:()=>openTask(null)},'+ নতুন কাজ') : null,
       el('button',{class:'ghost',onclick:()=>sb.auth.signOut()},'লগআউট')
     )
   );
@@ -213,7 +214,8 @@ async function renderBoard(isAdmin){
     if(!items.length) list.append(el('p',{class:'empty'},'কোনো কাজ নেই'));
     items.forEach(tk=>{
       const idx = Object.keys(STAGE).indexOf(st);
-      const card = el('div',{class:'t',style:'--cat:var(--'+tk.cat+')',onclick:()=>openTask(tk)},
+      const canOpen = isAdmin || tk.who===session.user.id;
+      const card = el('div',{class:'t',style:'--cat:var(--'+tk.cat+');cursor:'+(canOpen?'pointer':'default')+';opacity:'+(canOpen?'1':'.72'),onclick:canOpen?()=>openTask(tk):()=>{}},
         el('div',{class:'meta'}, el('span',{class:'pill'},CAT[tk.cat]), tk.pri==='urgent'?el('span',{class:'urgent'},'জরুরি'):''),
         el('h3',{},tk.title),
         el('div',{class:'meta'},
@@ -221,10 +223,10 @@ async function renderBoard(isAdmin){
           tk.due||''
         ),
         tk.file_url ? el('a',{class:'file-chip',href:tk.file_url,target:'_blank',rel:'noopener',onclick:e=>e.stopPropagation()},'📎 '+(tk.file_name||'ফাইল')) : '',
-        el('div',{class:'mv'},
+        canOpen ? el('div',{class:'mv'},
           el('button',{class:'ghost',disabled:idx===0,onclick:async(e)=>{e.stopPropagation();await moveStage(tk,-1);}},'‹'),
           el('button',{class:'ghost',disabled:idx===3,onclick:async(e)=>{e.stopPropagation();await moveStage(tk,1);}},'›')
-        )
+        ) : null
       );
       list.append(card);
     });
@@ -269,7 +271,8 @@ function openTask(tk){
   who.append(el('option',{value:''},'কেউ না'));
   (window._profiles||[]).forEach(p=>who.append(el('option',{value:p.id},p.full_name||p.email)));
   who.value = tk ? (tk.who||'') : '';
-  document.getElementById('delT').classList.toggle('hide', !tk);
+  document.getElementById('delT').classList.toggle('hide', !tk || !gIsAdmin);
+  ['fTitle','fCat','fWho','fPri','fDue'].forEach(id=>{ document.getElementById(id).disabled = !gIsAdmin; });
   document.getElementById('taskDlg').showModal();
 }
 function renderCurFile(){
